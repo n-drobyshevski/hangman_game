@@ -4,11 +4,13 @@ import random
 from rich.pretty import pprint
 from rich.console import Console
 from rich.prompt import Prompt, Confirm
+from rich.align import Align
 import os
 
 from exc import CustomException
 import cli
 import img
+import loader
 
 console = Console()
 
@@ -96,13 +98,13 @@ if __name__ == "__main__":
     cols, lines = cli.get_console_size()
     os.system('cls')
     # cli.multiline_echo(img.logo, style="green blink", justify='c', by_printer=False)
-    start = cli.echo('Start Game', m_type='ask',allign='c', justify='c')
+    start = cli.echo('[green]Start Game[/]', m_type='ask',allign='c', justify='c')
     time.sleep(2)
     os.system('cls')
     if start:
         cli.printer_by_line(img.logo, justify='c', style="green blink")
-        time.sleep(5)
-        cli.loader()
+        loader.load()
+        time.sleep(3)
         # os.system('cls')
         main()
     
