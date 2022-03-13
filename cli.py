@@ -22,9 +22,37 @@ def get_console_size():
     lines = size.lines
     return cols, lines
 
-cols, lines = get_console_size()
-width = cols // 8 * 4
-height = lines // 8  * 6
+
+def get_padding(msg, vertical='top', align='center'):
+    '''
+        returns padding size
+            msg -message needs for calculate message length
+            vertical - vertical padding [t:top, c:center, b:bottom]
+            align - vertical padding [l:left, c:center, r:right].
+       '''
+    cols, lines = get_console_size()
+    if vertical == 'center':
+        line_coeff = (lines - 3)// 2
+    elif vertical == 'bottom':
+        line_coeff = lines - 1
+    else:
+        line_coeff = 0
+    if align== 'center':
+        col_coeff = (cols  - len(msg))// 2
+    elif align == 'right':
+        col_coeff = cols - 1
+    else:
+        col_coeff = 0    
+    return col_coeff, line_coeff
+
+
+def manual_align(msg,align="center",vertical='top', clear=False):
+    '''manually creates padding by printing whitespaces and newline characters'''
+    col_coeff, line_coeff = get_padding(msg, vertical=vertical, align=align)   
+    if clear:
+        os.system('cls')
+        print('\n'*line_coeff)
+    print(' '*col_coeff, end='')
 
 
 def compose_string(s, *args):
@@ -39,46 +67,28 @@ def compose_string(s, *args):
     # console.log("compose string", "//",s,"//", ' -- return')
     return s
 
-def get_padding(msg, allign='t', justify='r'):
-    '''
-        returns padding size
-            msg -message needs for calculate message length
-            allign - vertical padding [t:top, c:center, b:bottom]
-            justify - vertical padding [l:left, c:center, r:right].
-       '''
-    cols, lines = get_console_size()
-    if allign == 'c':
-        line_coeff = (lines - 3)// 2
-    elif allign == 'b':
-        line_coeff = lines - 1
-    else:
-        line_coeff = 0
-    if justify== 'c':
-        col_coeff = (cols  - len(msg))// 2
-    elif justify == 'r':
-        col_coeff = cols - 1
-    else:
-        col_coeff = 0    
-    return col_coeff, line_coeff
 
-
-def printer_by_lett(msg, style='', justify='left', timing=0.1):
+def printer_by_lett(msg, style='', align='center',vertical="top", timing=0.075):
     '''
         prints message msg letter by letter
-        gets: justify -- x positionement 
-              timing  -- time to wait between line printings
-              style   -- additional apperance settings
+        gets: align    -- x positionement 
+              vertical -- y positionement !!possible only with clearing console 
+              timing   -- time to wait between line printings
+              style    -- additional apperance settings
     '''
+    clear = True if vertical!="top" else False
+    manual_align(msg, align=align, vertical=vertical, clear=clear)
     for i in msg:
-        console.print(Align(line, style=style, align=justify))
+        console.print(i, end='',style=style)
         time.sleep(timing)
+    print('')
     return ''
 
 
-def printer_by_line(msg, style='', justify='l', timing=0.1):
+def printer_by_line(msg, style='', align='center', timing=0.1):
     '''
         prints message msg line by line
-        gets: justify -- x positionement 
+        gets: align -- x positionement 
               timing  -- time to wait between line printings
               style   -- additional apperance settings
     '''
@@ -87,43 +97,32 @@ def printer_by_line(msg, style='', justify='l', timing=0.1):
     for line in msg:
         if len(line) > len(big_line):
             big_line = line
-    col_coeff, line_coeff = get_padding(big_line, justify=justify)
+    col_coeff, line_coeff = get_padding(big_line, align=align)
     for line in msg:
         console.print(Padding(line,(0,col_coeff), style=style))
         time.sleep(timing)
     return ''
         
+def prompt(msg, vertical='top', align='center', clear= False):
+    '''handles Confirm.ask apperance'''
+    manual_align(msg,align=align, vertical=vertical, clear=clear)
+    return Confirm.ask(msg)
 
-def echo(msg,m_type="normal", allign='t', justify='r',style='', clear_cli = False,*args,     **kwargs):
-    '''
-        clears console and prints message [m] of type [m_type] 
-        in specified position allign : y, justify :x.
-    '''
-    if clear_cli:
-        os.system('cls')
-        
-    col_coeff, line_coeff = get_padding(msg, allign=allign, justify=justify)     
-    if m_type == "normal":
-        # console.log(col_coeff,cols, len(m),m)
-        console.log(args)
-        if kwargs.by_printer:
-            console.print(Padding(printer_by_lett(msg,style),(line_coeff, col_coeff)))
-        else:
-            console.print(Padding(msg,(line_coeff, col_coeff)))
-        # time.sleep(4)
-        return
+
+def echo(msg, align='r',style=''):
+    col_coeff, line_coeff = get_padding(msg, align=align)   
+    # console.log(col_coeff,cols, len(m),m)
+    console.print(Padding(msg,(line_coeff, col_coeff)))
+    # time.sleep(4)
+    return
     
-    elif m_type == "ask":
-        print('\n'*line_coeff)
-        print(' '*col_coeff, end='')
-        return Confirm.ask(msg)
     
 
-def multiline_echo(m,m_type="normal", allign='t', justify='r',style='', clear_cli = False, **kwargs):
+def multiline_echo(m, align='r',style=''):
     '''same as echo but for more then 1 line.'''
     lines = m.split('\n')
     for line in lines:
-        echo(line,m_type, allign, justify, style, clear_cli)
+        echo(line, align, style)
 
 
 def exit_conf():
