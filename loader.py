@@ -16,7 +16,7 @@ console = Console()
 START_CHAR = ' '
 END_CHAR = '|'
 cols, lines = cli.get_console_size()
-lenght = cols // 8 * 5
+lenght = cols // 8 * 4  
 
 def create_loader(l, char):
     res = []

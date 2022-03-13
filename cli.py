@@ -2,7 +2,7 @@ from rich.console import Console
 from rich.prompt import Prompt, Confirm
 from rich.panel import Panel
 from rich.padding import Padding
-
+from rich.align import Align
 from rich.layout import Layout
 from rich import print
 from random import *
@@ -30,7 +30,6 @@ height = lines // 8  * 6
 def compose_string(s, *args):
     '''returns string s with %var% replaced by arguments from *args.'''
     
-    # console.log("compose string"," //", s, "// ",args[0]," //")
     if args:
         for a in args:
             s = s.replace("%var%", a, 1)
@@ -39,13 +38,6 @@ def compose_string(s, *args):
         raise CustomException("args are required")
     # console.log("compose string", "//",s,"//", ' -- return')
     return s
-
-
-# def glitcher(msg, chars):
-#     '''prints msg with glitch effect'''
-#     for let in msg:
-
-
 
 def get_padding(msg, allign='t', justify='r'):
     '''
@@ -70,16 +62,15 @@ def get_padding(msg, allign='t', justify='r'):
     return col_coeff, line_coeff
 
 
-def printer_by_lett(msg, style='', justify='l', timing=0.1):
+def printer_by_lett(msg, style='', justify='left', timing=0.1):
     '''
         prints message msg letter by letter
         gets: justify -- x positionement 
               timing  -- time to wait between line printings
               style   -- additional apperance settings
     '''
-    col_coeff, line_coeff = get_padding(big_line, justify=justify)
     for i in msg:
-        console.print(Padding(line,(0,col_coeff), style=style))
+        console.print(Align(line, style=style, align=justify))
         time.sleep(timing)
     return ''
 
@@ -142,27 +133,3 @@ def exit_conf():
         console.print("Exited from user input")
     return True
 
-
-def loader(char="|"):
-    '''displays loader.'''
-    os.system('cls')
-    cols, lines = get_console_size()
-    length = cols // 8 *2
-    col_coeff = (cols - length)// 2 -6
-    line_coeff = lines // 2 -3
-    
-    time.sleep(0.5)
-    loader_s = list(" "*length)
-    panel_title = "Loading"
-    for i in range(length+1):
-        if i == length:
-            panel_title = 'Completed'
-        os.system('cls')
-        load_panel = Panel.fit(''.join(loader_s), title=panel_title)
-        loader_obj = Padding(load_panel, (line_coeff, col_coeff), style="cyan")
-        print(loader_obj)
-        loader_s.pop()
-        loader_s.insert(0,char)
-        time.sleep(random()*0.2)
-    time.sleep(2.5)
-    os.system('cls')
