@@ -120,7 +120,7 @@ if __name__ == "__main__":
     os.system('cls')
     if start:
         cli.printer_by_line(img.logo, style="green blink")
-        # loader.load()
+        loader.load()
         time.sleep(3)
         os.system('cls')
         main()

@@ -48,28 +48,46 @@ def get_gap():
     lines_coeff = lines - 10 - img_height
     return lines_coeff
 
+prev_line = []
+def generate_steam(line_length, img):
+    res = [] 
+    # console.log('img len ',len(img))
+    for line in range(len(img)):
+        res_line = []
+        # console.log('generator next line size', img[line])
+        for char in img[line]:
+            # console.log('qqqqqqqqqqqq', char)
+            if char != '/n':
+                res_line.append(str(random.choice([0,1])))
+        # console.log('res_line', res_line)
+        res.insert(-1, res_line)
+        # console.log('res --', res)
+    for line in res:
+        print('res log --')
+        pprint(line)
+        yield res
+    return
 
-def glitcher(line):
-    for i in range(len(line)):
-        if line[i]!='\n':
-            line[i]=str(random.choice([0,1]))
-    print(line)
-    # console.log(type(line))
-    return line
+def glitcher(line, generator_obj):
+    for line in generator_obj:
+        yield line
+    return
 
-def updater(itteration, start, end):
+def updater(itteration, start, end, generator_obj):
     res = []
     for line in range(len(img.hangman)):
-        print(start[line])
+        # console.log('start line begin--', start[line])
         if start[line]!=['\n']:
-            start[line] = glitcher(start[line])
-        console.log('--')
-        # res.append(["[green]"]+end[line][:itteration]+["[/]"]+["[green dim]"]+start[line][itteration:]+["[/]"])
+            print('generator invoked')
+            start[line] = generator_obj.__next__()
+        # console.log('--')
+        # console.log('start line --',start[line])
+        # res.append(["[green]"]+end[line][:ietteration]+["[/]"]+["[green dim]"]+start[line][itteration:]+["[/]"])
         res.append(end[line][:itteration]+start[line][itteration:])
     
     return res
 
-def update_panel(itteration,start_img, end_img,caption, glitch=False):
+def update_panel(itteration,start_img, end_img,caption, generator_obj, glitch=False):
     caption_text = "[purple]Loading...[/]"
     if caption:
         caption_text = '[purple]Completed.[/]'
@@ -81,11 +99,29 @@ def update_panel(itteration,start_img, end_img,caption, glitch=False):
     #         start_img[i]=str(random.choice([0,1]))
 
     # seconde phase shift un_updated image 
-    end_img = updater(itteration=itteration, end=end_img, start=start_img)
+    end_img = updater(itteration=itteration, end=end_img, start=start_img, generator_obj=generator_obj)
 
     # final phase transforming list of lists in string
+
+    # adding missing newlines
+    for i in end_img:
+        for j in i:
+            if type(j) == str:
+                j = '\n'
+            else:
+                j.pop()
+                j.append('\n')
+    
+    # copmposing
     res = []
+    pprint(end_img)
     for line in end_img:
+        line = line[0]
+        # for sub in range(len(line)):
+        #     line[sub] =''.join(line[sub])
+            # print('sub --',sub)
+        # print(type(line))
+        print(" ".join(['1','3']))
         line = "".join(line)
         res.append(line)
     res =''.join(res)
@@ -97,16 +133,18 @@ def update_panel(itteration,start_img, end_img,caption, glitch=False):
 def draw(img_id):
     start_img = replaced_img_repr(img.hangman[img_id],'*')
     end_img = img_repr(img.hangman[img_id])
+    stream = generate_steam(img= start_img, line_length=img.hangman['length'])
+    # console.log(end_img)
     with Live(console=console,auto_refresh=False) as live:  # update 4 times a second to feel fluid
         for i in range(img.hangman['length']+3):
             caption = False
             if i == len(start_img):
                 caption = True
-            live.update(update_panel(i, start_img, end_img, caption),refresh=True)
+            live.update(update_panel(i, start_img, end_img, caption,generator_obj=stream), refresh=True)
             time.sleep(.1)  # arbitrary delay
 
 
 try:       
     draw(0)
 except Exception:
-    console.print_exception(show_locals = True)
+    console.print_exception(show_locals = False)
