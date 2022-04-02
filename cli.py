@@ -1,3 +1,7 @@
+import os 
+import time
+from random import *
+
 from rich.console import Console
 from rich.prompt import Prompt, Confirm
 from rich.panel import Panel
@@ -5,10 +9,7 @@ from rich.padding import Padding
 from rich.align import Align
 from rich.layout import Layout
 from rich import print
-from random import *
-import os 
-import sys
-import time
+
 from exc import CustomException
 
 
@@ -18,14 +19,12 @@ console = Console(highlight=False)
 def get_console_size():
     '''returns current console size'''
     size =  os.get_terminal_size()
-    cols = size.columns
-    lines = size.lines
-    return cols, lines
+    return size.columns, size.lines
 
 
 def get_padding(msg, vertical='top', align='center'):
     '''
-        returns padding size
+        returns padding size (two integers corresponding to: number of newlines and number whitespace)
             msg -message needs for calculate message length
             vertical - vertical padding [t:top, c:center, b:bottom]
             align - vertical padding [l:left, c:center, r:right].
@@ -55,26 +54,13 @@ def manual_align(msg,align="center",vertical='top', clear=False):
     print(' '*col_coeff, end='')
 
 
-def compose_string(s, *args):
-    '''returns string s with %var% replaced by arguments from *args.'''
-    
-    if args:
-        for a in args:
-            s = s.replace("%var%", a, 1)
-            # console.log('replaced //', s, '//')
-    else:
-        raise CustomException("args are required")
-    # console.log("compose string", "//",s,"//", ' -- return')
-    return s
-
-
 def printer_by_lett(msg, style='', align='center',vertical="top", timing=0.075):
     '''
         prints message msg letter by letter
-        gets: align    -- x positionement 
-              vertical -- y positionement !!possible only with clearing console 
+        gets: align    -- x position 
+              vertical -- y position !!possible only with clearing console 
               timing   -- time to wait between line printings
-              style    -- additional apperance settings
+              style    -- additional appearance settings
     '''
     clear = True if vertical!="top" else False
     manual_align(msg, align=align, vertical=vertical, clear=clear)
@@ -88,9 +74,10 @@ def printer_by_lett(msg, style='', align='center',vertical="top", timing=0.075):
 def printer_by_line(msg, style='', align='center', timing=0.1):
     '''
         prints message msg line by line
-        gets: align -- x positionement 
+        gets: align -- x position
               timing  -- time to wait between line printings
-              style   -- additional apperance settings
+              style   -- additional appearance settings
+              timing  -- time between print lines
     '''
     big_line = ''
     msg = msg.split('\n')
@@ -103,30 +90,18 @@ def printer_by_line(msg, style='', align='center', timing=0.1):
         time.sleep(timing)
     return ''
         
-def prompt(msg, vertical='top', align='center', clear= False):
-    '''handles Confirm.ask apperance'''
+def prompt(msg, type,vertical='top', align='center', clear= False):
+    '''handles Confirm.ask appearance'''
     manual_align(msg,align=align, vertical=vertical, clear=clear)
-    return Confirm.ask(msg)
-
-
-def echo(msg, align='r',style=''):
-    col_coeff, line_coeff = get_padding(msg, align=align)   
-    # console.log(col_coeff,cols, len(m),m)
-    console.print(Padding(msg,(line_coeff, col_coeff)))
-    # time.sleep(4)
-    return
-    
-    
-
-def multiline_echo(m, align='r',style=''):
-    '''same as echo but for more then 1 line.'''
-    lines = m.split('\n')
-    for line in lines:
-        echo(line, align, style)
-
+    if type == 'confirm':
+        # TODO: needs Prompt.ask support
+        return Confirm.ask(msg)
+    if type == 'question':
+        # TODO: needs Prompt.ask support
+        return Prompt.ask(msg)
 
 def exit_conf():
-    '''Confirm exit choice.'''
+    '''Confirm user's exit choice.'''
     conf = Confirm.ask('Do you want to exit?')
     if conf:
         console.print("Exited from user input")

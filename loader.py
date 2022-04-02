@@ -1,5 +1,6 @@
 import time
 import random
+
 from rich.live import Live
 from rich.table import Table
 from rich.console import Console
@@ -16,7 +17,7 @@ console = Console()
 START_CHAR = ' '
 END_CHAR = '|'
 cols, lines = cli.get_console_size()
-lenght = cols // 8 * 4  
+length = cols // 8 * 4  
 
 def create_loader(l, char):
     res = []
@@ -24,8 +25,8 @@ def create_loader(l, char):
         res.append(char)
     return res
 
-start_loader = create_loader(lenght, START_CHAR)
-end_loader = create_loader(lenght, END_CHAR)
+start_loader = create_loader(length, START_CHAR)
+end_loader = create_loader(length, END_CHAR)
 
 def get_gap():
     img_height = 0
@@ -36,8 +37,7 @@ def get_gap():
     return lines_coeff
 
 
-
-def update_loader(itteration,start_loader, end_loader,caption, glitch=True):
+def update_loader(iteration,start_loader, end_loader,caption, glitch=True):
     caption_text = "[purple]Loading...[/]"
     if caption:
         caption_text = '[purple]Completed.[/]'
@@ -45,7 +45,7 @@ def update_loader(itteration,start_loader, end_loader,caption, glitch=True):
     if glitch :
         for i in range(len(start_loader)):
             start_loader[i]=str(random.choice([0,1]))
-    end_loader = ["[green]"]+end_loader[:itteration]+["[/]"]+["[green dim]"]+start_loader[itteration:]+["[/]"]
+    end_loader = ["[green]"]+end_loader[:iteration]+["[dim]"]+start_loader[iteration:]+["[/]"]
     table.add_row("".join(end_loader))
     table = Align(table,align="center")
     return table
@@ -53,10 +53,13 @@ def update_loader(itteration,start_loader, end_loader,caption, glitch=True):
 def load():
     print('\n'*get_gap())
     with Live(console=console,auto_refresh=False) as live:  # update 4 times a second to feel fluid
+        
         for i in range(len(start_loader)+1):
+            
             caption = False
             if i == len(start_loader):
                 caption = True
+                
             live.update(update_loader(i, start_loader, end_loader, caption),refresh=True)
             time.sleep(.1)  # arbitrary delay
         
