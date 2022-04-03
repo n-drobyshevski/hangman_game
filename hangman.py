@@ -1,12 +1,6 @@
-import time 
-import os
-import random
+import time, os, random, re
 
-from rich.pretty import pprint
-from rich.panel import Panel
 from rich.console import Console
-from rich.prompt import Prompt, Confirm
-from rich.align import Align
 
 from exc import CustomException
 
@@ -17,7 +11,11 @@ import panel_img
 
 console = Console()
 
-WORDS = ("python", "programming", "dictionnary", "editor", "list", "function")
+
+pattern = re.compile('[A-Z]')
+
+# WORDS = ("python", "programming", "dictionnary", "editor", "list", "function")
+WORDS = ("q")
     
 
 def set_word(words):
@@ -33,13 +31,11 @@ def create_repr(word):
 
 def update_repr(word,current_repr, guess):
     """ Replaces ' _ ' to a letter  """
+    current_repr = list(current_repr)
     ind = 0
     for let in word:
         if let == guess:
-            current_repr = list(current_repr)
-            pprint(type(current_repr))
             current_repr[ind] = let
-            return current_repr
         ind += 1
     return current_repr
 
@@ -47,21 +43,29 @@ def update_repr(word,current_repr, guess):
 def status_logger(hp, turns, guessed_word, wrong_letters):
     print('\n'*3)
     panel_img.draw(hp)
+    print('\n')
     cli.printer_by_lett(f"Turn # {turns}", style="green")
-    cli.printer_by_lett(f"Guessed word  -- {' '.join(guessed_word)}", style="green")
-    cli.printer_by_line(f"Wrong letters -- {''.join(wrong_letters)}", style="red")
+    cli.printer_by_lett(f"Guessed word -- {' '.join(guessed_word)}", style="green")
+    cli.printer_by_line(f"Wrong letters : {' - '.join(wrong_letters)}", style="magenta")
+    col, lines = cli.get_console_size()
+    print('\n'*(lines//2-20))
 
 # TODO: docstrings
 def correct_letter_handler(word, guess, guessed_word):
-    console.print("Succeed!", style="magenta")
+    print('\n')
+    cli.printer_by_lett("Succeed!", style="cyan")
     guessed_word = update_repr(word, guessed_word, guess)
+    time.sleep(2)
     os.system('cls')
     return guessed_word
     
 def wrong_letter_handler(guess, wrong_letters, hp):
     wrong_letters.append(guess)
     hp -= 1
-    console.print("U FUCKED UP", style="blink red")
+    print('\n')
+    cli.printer_by_lett("Nop!", style="magenta")
+    time.sleep(2)
+    os.system('cls')
     return wrong_letters, hp
 
     
@@ -86,9 +90,16 @@ def main():
         os.system('cls')
         while True:
             status_logger(hp=hp, guessed_word=guessed_word, turns=turns, wrong_letters=wrong_letters)
-
+            print(' '*4,end='')
             guess = cli.prompt("[green]Try one letter[/]",type="question") # User input TODO: protect this
             # Exit check
+            if len(guess) != 1:
+                if guess.capitalize() != pattern:
+                    print(' '*4,end='')
+                    cli.printer_by_lett('Enter one letter!', style='magenta')
+                    time.sleep(2)
+                    os.system('cls')
+                    continue
             if guess == "-e" or guess == "--exit":
                     if cli.exit_conf(): return
             # if correct
@@ -96,15 +107,17 @@ def main():
                 guessed_word = correct_letter_handler(word, guess, guessed_word)
             #  if wrong
             else:
-                wrong_letter_handler(guess, wrong_letters, hp) #TODO: unfinished function 
+                wrong_letters, hp = wrong_letter_handler(guess, wrong_letters, hp) #TODO: unfinished function 
                 if hp==0:
                     return
             # finish check
             if '_' not in guessed_word:
-                console.print(f"Finished.\nThe word was - \"{word}\"")
-            
+                cli.printer_by_lett(f"Finished",style='')
+                cli.printer_by_lett(f"The word was - \"{word}\"",style='')
+                time.sleep(3)
+                return
             turns +=1 
-            return
+            # return
     except CustomException:
         console.print_exception(show_locals = True)
 

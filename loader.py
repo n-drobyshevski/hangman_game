@@ -15,7 +15,7 @@ import img
 console = Console()
 
 START_CHAR = ' '
-END_CHAR = '|'
+END_CHAR = '█'
 cols, lines = cli.get_console_size()
 length = cols // 8 * 4  
 
@@ -37,15 +37,23 @@ def get_gap():
     return lines_coeff
 
 
-def update_loader(iteration,start_loader, end_loader,caption, glitch=True):
-    caption_text = "[purple]Loading...[/]"
+def update_loader(iteration,start_loader, end_loader,caption):
+    #caption 
+    caption_text = "[green]Loading...[/]"
     if caption:
-        caption_text = '[purple]Completed.[/]'
-    table = Table(show_header=False,caption=caption_text, show_edge=True, border_style="purple dim",box=box.ROUNDED)
-    if glitch :
-        for i in range(len(start_loader)):
-            start_loader[i]=str(random.choice([0,1]))
-    end_loader = ["[green]"]+end_loader[:iteration]+["[dim]"]+start_loader[iteration:]+["[/]"]
+        caption_text = '[green]Completed.[/]'
+        
+    # initialize table
+    table = Table(show_header=False,caption=caption_text, show_edge=True, border_style="green ",box=box.ROUNDED)
+    
+    # fill string with "1 0" 
+    for i in range(len(start_loader)):
+        start_loader[i]=str(random.choice([0,1]))
+    
+    # composing string 
+    end_loader = ["[purple dim]"]+end_loader[:iteration]+[""]+start_loader[iteration:]+["[/]"]
+    
+    # adding composed string in table as row
     table.add_row("".join(end_loader))
     table = Align(table,align="center")
     return table
@@ -55,7 +63,7 @@ def load():
     with Live(console=console,auto_refresh=False) as live:  # update 4 times a second to feel fluid
         
         for i in range(len(start_loader)+1):
-            
+            # caption handler     
             caption = False
             if i == len(start_loader):
                 caption = True
